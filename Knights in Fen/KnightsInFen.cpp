@@ -126,6 +126,11 @@ int KnightsInFen::solve() {
     while(!frontier.empty()) {
         node = frontier.front();
         frontier.pop();
+
+        if (node.getCost() > 10) {
+            return -1;
+        }
+
         for (auto child : expand(std::shared_ptr<Node>(&node))) {
             if (child.getPosition() == goal) {
                 return child.getCost();

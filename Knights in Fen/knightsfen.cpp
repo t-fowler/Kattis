@@ -47,12 +47,17 @@ int main() {
     int N;
     std::cin >> N;
     for (int i = 0; i < N; i++) {
+        int minimumNumberOfMoves = -1;
         Board board = parse_position();
         //print_position(board);
         //std::cerr << std::endl;
 
-        K
-
-
+        KnightsInFen problem(board);
+        minimumNumberOfMoves = problem.solve();
+        if (minimumNumberOfMoves < 0) {
+            std::cout << "Unsolvable in less than 11 move(s)." << std::endl;
+        } else {
+            std::cout << "Solvable in " << minimumNumberOfMoves << " move(s)." << std::endl;
+        }
     }
 }
