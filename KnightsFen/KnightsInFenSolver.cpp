@@ -86,9 +86,9 @@ std::vector<Move> KnightsInFenSolver::moves(Board position) {
 }
 
 Board KnightsInFenSolver::makeMove(Board position, Move move) {
-    Piece movePiece = position[move.first];
-    position[move.second] = movePiece;
-    position[move.first] = EMPTY;
+    Piece movePiece = position[move.second];
+    position[move.first] = movePiece;
+    position[move.second] = EMPTY;
     
     return position;
 }
@@ -104,7 +104,7 @@ std::vector<std::shared_ptr<Node>> KnightsInFenSolver::expand(std::shared_ptr<No
 
 KnightsInFenSolver::KnightsInFenSolver(Board initial) {
     this->initial = initial;
-    this-> goal = {
+    this->goal = {
         BLACK_KNIGHT, BLACK_KNIGHT, BLACK_KNIGHT, BLACK_KNIGHT, BLACK_KNIGHT,
         WHITE_KNIGHT, BLACK_KNIGHT, BLACK_KNIGHT, BLACK_KNIGHT, BLACK_KNIGHT,
         WHITE_KNIGHT, WHITE_KNIGHT, EMPTY, BLACK_KNIGHT, BLACK_KNIGHT,
@@ -127,8 +127,11 @@ int KnightsInFenSolver::solve() {
         std::shared_ptr<Node> node = frontier.front();
         frontier.pop();
 
-        std::cerr << node->getCost() << std::endl;
+        //print_position(node->getPosition());
+
+        //std::cerr << node->getCost() << std::endl;
         if (node->getCost() > 10) {
+            //std::cerr << "Too deep." << std::endl;
             return -1;
         }
 
@@ -136,7 +139,7 @@ int KnightsInFenSolver::solve() {
         for (auto child : possibleMoves) {
             //std::cerr << child->getCost() << std::endl;
             if (child->getPosition() == goal) {
-                std::cerr << "SUCCESS!!!" << std::endl;
+                //std::cerr << "SUCCESS!!!" << std::endl;
                 return child->getCost();
             }
             if (std::find(reached.begin(), reached.end(), child->getPosition()) == reached.end()) {
