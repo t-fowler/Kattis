@@ -2,7 +2,7 @@
 #include <string>
 
 #include "knightsfen.hpp"
-#include "KnightsInFen.hpp"
+#include "KnightsInFenSolver.hpp"
 
 void print_position(Board b) {
     for (int i = 0; i < 5; i++) {
@@ -44,7 +44,7 @@ bool is_valid_square(int idx) {
 }
 
 int main() {
-    int N;
+    int N = 0;
     std::cin >> N;
     for (int i = 0; i < N; i++) {
         int minimumNumberOfMoves = -1;
@@ -52,7 +52,7 @@ int main() {
         //print_position(board);
         //std::cerr << std::endl;
 
-        KnightsInFen problem(board);
+        KnightsInFenSolver problem(board);
         minimumNumberOfMoves = problem.solve();
         if (minimumNumberOfMoves < 0) {
             std::cout << "Unsolvable in less than 11 move(s)." << std::endl;
