@@ -15,25 +15,30 @@ Node::Node(std::shared_ptr<Node> parent, Board position, Move move) {
     this->appliedMove = move;
 }
 
-int Node::getCost() const {
+int Node::getCost() {
     if (parent == NULL) {
         return 0;
     }
     return parent->getCost() + 1;
 }
 
-std::shared_ptr<Node> Node::getParent() const {
-    return parent;
+Node Node::getParent() {
+    return *parent;
 }
 
-Board Node::getPosition() const {
+Board Node::getPosition() {
     return position;
 }
 
-Move Node::getAppliedMove() const {
+Move Node::getAppliedMove() {
     return appliedMove;
 }
 
+//
+// Finds the empty square on the board (assumes only one). Returns a list
+// of all the valid knight moves by filtering out moves that would go off
+// the 5x5 board.
+//
 std::vector<Move> KnightsInFenSolver::moves(Board position) {
     std::vector<Move> result;
     int emptySquare = -1;
@@ -78,8 +83,9 @@ std::vector<Move> KnightsInFenSolver::moves(Board position) {
     }
 
     for (auto move : result) {
-        if (move.first < 0 || move.first > 24 || move.second < 0 || move.second > 24)
-            std::cerr << "Error in moves: " << emptySquare << std::endl;
+        if (move.first < 0 || move.first > 24 || 
+            move.second < 0 || move.second > 24)
+                std::cerr << "Error in moves: " << emptySquare << std::endl;
     }
 
     return result;
@@ -93,7 +99,12 @@ Board KnightsInFenSolver::makeMove(Board position, Move move) {
     return position;
 }
 
-std::vector<std::shared_ptr<Node>> KnightsInFenSolver::expand(std::shared_ptr<Node> node) {
+//
+// Creates the child nodes by applying all the legal moves to the node's
+// position. 
+//
+std::vector<std::shared_ptr<Node>> 
+KnightsInFenSolver::expand(std::shared_ptr<Node> node) {
     std::vector<std::shared_ptr<Node>> result;
     Board position = node->getPosition();
     for(Move move : moves(position)) {
@@ -113,31 +124,48 @@ KnightsInFenSolver::KnightsInFenSolver(Board initial) {
     };
 }
 
-int KnightsInFenSolver::solve() {
-    std::shared_ptr<Node> root = std::shared_ptr<Node>(new Node(initial));
-    if (root->getPosition() == goal) return 0;
+//
+// Determines how many pieces are in incorrect positions.
+//
+int KnightsInFenSolver::heuristic(Board position) {
+    int numberOfIncorrectPieces = 0;
+    for (int i = 0; i < 25; i++) {
+        if (position[i] != EMPTY && position[i] != goal[i])
+            ++numberOfIncorrectPieces;
+    }
+    return numberOfIncorrectPieces;
+}
 
-    std::queue<std::shared_ptr<Node>> frontier;
-    frontier.push(root);
+//
+// Solves the search problem using the A* algorithm with the above heuristic.
+//
+int KnightsInFenSolver::solve() {
+    auto compare = [&](std::shared_ptr<Node> left, std::shared_ptr<Node> right) {
+        return (left->getCost() + heuristic(left->getPosition())) 
+            > (right->getCost() + heuristic(right->getPosition()));
+    };
+    std::priority_queue<
+        std::shared_ptr<Node>, 
+        std::vector<std::shared_ptr<Node>>, 
+        decltype(compare)> 
+    frontier(compare);
+    frontier.push(std::shared_ptr<Node>(new Node(initial)));
+    if (frontier.top()->getPosition() == goal)
+        return 0;
 
     std::vector<Board> reached;
     reached.push_back(initial);
 
     while(!frontier.empty()) {
-        std::shared_ptr<Node> node = frontier.front();
+        std::shared_ptr<Node> node = frontier.top();
         frontier.pop();
 
-        //print_position(node->getPosition());
-
-        //std::cerr << node->getCost() << std::endl;
         if (node->getCost() > 10) {
-            //std::cerr << "Too deep." << std::endl;
             return -1;
         }
 
         auto possibleMoves = expand(node);
         for (auto child : possibleMoves) {
-            //std::cerr << child->getCost() << std::endl;
             if (child->getPosition() == goal) {
                 //std::cerr << "SUCCESS!!!" << std::endl;
                 return child->getCost();

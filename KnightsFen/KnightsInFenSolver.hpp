@@ -5,33 +5,41 @@
 #include <vector>
 #include "knightsfen.hpp"
 
+/*
+ * A node class for the search tree.
+ */
 class Node {   
 private:     
     std::shared_ptr<Node> parent;
     Board position;
     Move appliedMove;
+
 public:
     Node(Board position);
     Node(std::shared_ptr<Node> parent, Board position, Move move);
 
-    Node& operator=(const Node &other);
-
-    int getCost() const;
-    std::shared_ptr<Node> getParent() const;
-    Board getPosition() const;
-    Move getAppliedMove() const;
+    int getCost(); // Number of moves from the initial position.
+    Node getParent();
+    Board getPosition();
+    Move getAppliedMove();
 };
 
+/*
+ * A solver class for the Knights in Fen problem.
+ */
 class KnightsInFenSolver {
 private:
     Board initial;
     Board goal;
 
-    std::vector<Move> moves(Board position);
-    Board makeMove(Board position, Move move);
-    std::vector<std::shared_ptr<Node>> expand(std::shared_ptr<Node> node);
+    std::vector<Move> moves(Board position); // All moves that are legal in the given position.
+    Board makeMove(Board position, Move move); // Get the position after makeing the move.
+    std::vector<std::shared_ptr<Node>> expand(std::shared_ptr<Node> node); // Expand the search tree with children of node.
+
 public:
     KnightsInFenSolver(Board initial);
+
+    int heuristic(Board position);
     int solve();
 };
 

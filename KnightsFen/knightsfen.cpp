@@ -39,10 +39,6 @@ Board parse_position() {
     return position;
 }
 
-bool is_valid_square(int idx) {
-    return (idx >= 0 && idx < 25);
-}
-
 int main() {
     int N = 0;
     std::cin >> N;
