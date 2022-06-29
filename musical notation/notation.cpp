@@ -5,14 +5,11 @@
 
 enum Note {
     G, F, E, D, C, B, A,
-    g, f, e, d, c, b, a,
-    NO_NOTE
+    g, f, e, d, c, b, a
 };
 
-void fillLinesOtherThan(std::array<std::string, 14> &sheet_music, Note note) {
+void fillLines(std::array<std::string, 14> &sheet_music) {
     for (int i = 0; i < 14; i++) {
-        if (i == note)
-            continue;
         if (i == F || i == D || i == B || i == g || i == e || i == a) {
             sheet_music[i].append("-");
         } else {
@@ -42,7 +39,7 @@ int main () {
         {'a', a}
     };
 
-    std::array<std::string, 14> output = {
+    std::array<std::string, 14> sheet_music = {
         "G: ",
         "F: ",
         "E: ",
@@ -60,31 +57,31 @@ int main () {
     };
 
     for (int i = 0; i < n; i++) {
-        char note;
-        int length;
-        std::cin >> note;
+        std::string note;
+        std::cin >> std::ws >> note;
 
-        if (std::cin.peek() == ' ') {
-            length = 1;
-        } else {
-            std::cin >> length;
-        }
-        std::cin >> std::ws;
+        Note currentNote = charToNoteMap[note[0]];
+        int length = note[1] - 49;  // Number of extra stars to print.
 
-        std::cerr << "note: " << note << std::endl 
-            << "length: " << length << std::endl << std::endl;
-            
-        // Add stars for the current note.
-        for (int j = 0; j < length; j++) {
-            output[charToNoteMap[note]].append("*");
-            fillLinesOtherThan(output, charToNoteMap[note]);
+        fillLines(sheet_music);
+        sheet_music[currentNote][sheet_music[0].size()-1] = '*';
+        
+        if (note.size() > 1) {
+            for (int j = 0; j < length; j++) {
+                fillLines(sheet_music);
+                sheet_music[currentNote][sheet_music[0].size()-1] = '*';
+            }   
         }
+        
         if (i != n-1)
-            fillLinesOtherThan(output, NO_NOTE);
+            fillLines(sheet_music);
+
+        //std::cerr << "note: " << note << std::endl 
+        //    << "length: " << length << std::endl << std::endl;
         
     }
 
-    for (std::string line : output) {
+    for (std::string line : sheet_music) {
         std::cout << line << std::endl;
     }
 }
