@@ -7,15 +7,18 @@ Node::Node(Board position) {
     this->parent = NULL;
     this->position = position;
     this->appliedMove = std::make_pair(-1, -1);
+    this->cost = 0;
 }
 
-Node::Node(std::shared_ptr<Node> parent, Board position, Move move) {
+Node::Node(std::shared_ptr<Node> parent, Board position, Move move, uint64_t cost) {
     this->parent = parent;
     this->position = position;
     this->appliedMove = move;
+    this->cost = cost;
 }
 
-int Node::getCost() {
+uint16_t Node::getCost() {
+    return this->cost;
     if (parent == NULL) {
         return 0;
     }
@@ -108,7 +111,7 @@ KnightsInFenSolver::expand(std::shared_ptr<Node> node) {
     std::vector<std::shared_ptr<Node>> result;
     Board position = node->getPosition();
     for(Move move : moves(position)) {
-        result.push_back(std::shared_ptr<Node>(new Node(node, makeMove(position, move), move)));
+        result.push_back(std::shared_ptr<Node>(new Node(node, makeMove(position, move), move, node->getCost() + 1)));
     }
     return result;
 }
@@ -150,6 +153,7 @@ int KnightsInFenSolver::solve() {
         decltype(compare)> 
     frontier(compare);
     frontier.push(std::shared_ptr<Node>(new Node(initial)));
+
     if (frontier.top()->getPosition() == goal)
         return 0;
 
@@ -163,13 +167,13 @@ int KnightsInFenSolver::solve() {
         if (node->getCost() > 10) {
             return -1;
         }
-
-        auto possibleMoves = expand(node);
-        for (auto child : possibleMoves) {
-            if (child->getPosition() == goal) {
+        
+        if (node->getPosition() == goal) {
                 //std::cerr << "SUCCESS!!!" << std::endl;
-                return child->getCost();
-            }
+                return node->getCost();
+        }
+
+        for (auto child : expand(node)) {
             if (std::find(reached.begin(), reached.end(), child->getPosition()) == reached.end()) {
                 reached.push_back(child->getPosition());
                 frontier.push(child);

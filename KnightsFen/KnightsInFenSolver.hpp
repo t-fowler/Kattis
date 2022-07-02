@@ -13,12 +13,13 @@ private:
     std::shared_ptr<Node> parent;
     Board position;
     Move appliedMove;
+    uint64_t cost;
 
 public:
     Node(Board position);
-    Node(std::shared_ptr<Node> parent, Board position, Move move);
+    Node(std::shared_ptr<Node> parent, Board position, Move move, uint64_t cost);
 
-    int getCost(); // Number of moves from the initial position.
+    uint16_t getCost(); // Number of moves from the initial position.
     Node getParent();
     Board getPosition();
     Move getAppliedMove();
