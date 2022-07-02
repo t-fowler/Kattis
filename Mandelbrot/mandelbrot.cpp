@@ -21,11 +21,10 @@ double complexModulus(complex c) {
 
 bool mandelbrot(complex accumulator, complex c, int maxIterations) {
     complex zN = complexSquared(accumulator) + c;
-    if (maxIterations == 0) {
-        return true;
-    } else if (complexModulus(zN) > 2.0) {
+    if (complexModulus(zN) > 2.0)
         return false;
-    }
+    if (maxIterations == 0)
+        return true;
     return mandelbrot(zN, c, maxIterations - 1);
 }
 
