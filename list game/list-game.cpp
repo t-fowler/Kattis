@@ -23,8 +23,6 @@ int countPrimeFactors(int X) {
 
 int main() {
     int X = 0;
-
     std::cin >> X;
-
     std::cout << countPrimeFactors(X) << std::endl;
 }
