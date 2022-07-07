@@ -88,7 +88,7 @@ std::map<int, int> initTimer(int V, std::vector<Vertex> fruitClearings) {
  * @return std::map<int, int> a map from clearing indices to the distance from the
  * cottage clearing.
  */
-std::map<int, int> findshortestPaths(int V, std::vector<Edge> edgeList) {
+std::map<int, int> findShortestPaths(int V, std::vector<Edge> edgeList) {
     std::vector<int> visited = {1};
     std::map<int, int> distanceTo;
     for (int i = 1; i <= V; ++i) {
@@ -103,11 +103,14 @@ std::map<int, int> findshortestPaths(int V, std::vector<Edge> edgeList) {
         return distanceTo[a] - distanceTo[b];
     };
     std::vector<int> queue;
+    queue.push_back(1);
     std::push_heap(queue.begin(), queue.end(), compareDistance);
 
     while (!queue.empty()) {
-        int node = queue.back();
         std::pop_heap(queue.begin(), queue.end(), compareDistance);
+        int node = queue.back();
+        queue.pop_back();
+        
 
         for (Edge e : edgeList) {
             if (e.fromNode() != node) continue;
@@ -117,11 +120,13 @@ std::map<int, int> findshortestPaths(int V, std::vector<Edge> edgeList) {
                 distanceTo[nextNode] = distanceTo[node] + e.weight();
                 if (std::find(queue.begin(), queue.end(), nextNode)
                     == queue.end()) {
-                    std::push_heap(queue.begin(), queue.end(), nextNode);
+                    queue.push_back(nextNode);
+                    std::push_heap(queue.begin(), queue.end(), compareDistance);
                 } else {
                     std::remove(queue.begin(), queue.end(), nextNode);
                     std::make_heap(queue.begin(), queue.end(), compareDistance);
-                    std::push_heap(queue.begin(), queue.end(), nextNode);
+                    queue.push_back(nextNode);
+                    std::push_heap(queue.begin(), queue.end(), compareDistance);
                 }
             }
         }
