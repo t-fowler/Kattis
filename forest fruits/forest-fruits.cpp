@@ -18,11 +18,10 @@ int main() {
         std::cerr << "Distance to " << i << " is " 
             << distanceToFruit[i] << "." << std::endl;
     }
-    /*
-    for (int i = 0; i < M; ++i) {
 
+    for (int i = 0; i <= K; ++i) {
+        
     }
-    */
 }
 
 /**
