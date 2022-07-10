@@ -1,4 +1,5 @@
 #include <algorithm>
+#include <climits>
 #include <iostream>
 #include <queue>
 #include "forest-fruits.hpp"
@@ -92,7 +93,7 @@ std::map<int, int> findShortestPaths(int V, std::vector<Edge> edgeList) {
     std::vector<int> visited = {1};
     std::map<int, int> distanceTo;
     for (int i = 1; i <= V; ++i) {
-        distanceTo[i] = -1;
+        distanceTo[i] = INT_MAX;
     }
     distanceTo[1] = 0;
 
