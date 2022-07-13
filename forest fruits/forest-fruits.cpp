@@ -9,9 +9,9 @@ int main() {
     int V, E, C, K, M;
     std::cin >> V >> E >> C >> K >> M >> std::ws;
 
-    int numberOfDays = M;
+    int days = M;
     if (K < M) {
-        numberOfDays = K;
+        days = K;
     }
 
     std::vector<Edge> edgeList = readEdges(E);
@@ -41,11 +41,11 @@ int main() {
 
 
 
-    if (fruitClearings.size() < numberOfDays || fruitClearings[numberOfDays-1] == INT_MAX) {
+    if (fruitClearings.size() < days || fruitClearings[days-1] == INT_MAX) {
         std::cout << -1 << std::endl;
     } else {
-        //std::cerr << "Kth shortest distance: " << fruitClearings[numberOfDays-1] << std::endl;
-        std::cout << distanceToFruit[fruitClearings[numberOfDays-1]]*2 << std::endl;
+        //std::cerr << "Kth shortest distance: " << fruitClearings[days-1] << std::endl;
+        std::cout << distanceToFruit[fruitClearings[days-1]]*2 << std::endl;
     }
 
     return 0;
