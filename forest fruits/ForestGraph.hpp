@@ -1,3 +1,6 @@
+#include <memory>
+#include <vector>
+
 class Vertex {
   private:
     int i;
@@ -6,16 +9,28 @@ class Vertex {
     Vertex(int i);
     int index();
     int distance();
+    void setDistance(int d);
 };
 
 class Edge {
   private:
-    int u;
-    int v;
+    std::shared_ptr<Vertex> u;
+    std::shared_ptr<Vertex> v;
     int w;
   public:
-    Edge(int u, int v, int w);
-    int fromNode();
-    int toNode();
+    Edge(std::shared_ptr<Vertex> u, std::shared_ptr<Vertex> v, int w);
+    std::shared_ptr<Vertex> fromNode();
+    std::shared_ptr<Vertex> toNode();
     int weight();
+};
+
+class ForestGraph {
+  private:
+    int V;
+    int E;
+    std::vector<std::vector<Edge>> adj;
+  public:
+    ForestGraph(int V, int E);
+    void addEdge(Edge &e);
+    std::vector<Edge> adjacentTo(int v);
 };

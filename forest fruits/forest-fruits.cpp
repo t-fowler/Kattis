@@ -14,38 +14,41 @@ int main() {
         days = K;
     }
 
-    std::vector<Edge> edgeList = readEdges(E);
-    std::vector<int> fruitClearings = readFruitList(C);
-    std::map<int, int> distanceToFruit = findShortestPaths(V, edgeList);
+    std::vector<std::shared_ptr<Vertex>> vertexList;
+    for (int i = 1; i <= V; ++i) {
+        vertexList.push_back(std::shared_ptr<Vertex>(new Vertex(i)));
+    }
+    std::vector<Edge> edgeList = readEdges(E, vertexList);
+    std::vector<std::shared_ptr<Vertex>> fruitClearings = readFruitList(C, vertexList);
+    findShortestPaths(V, vertexList, edgeList);
     
-    auto compareDistance = [&](int a, int b) {
-        if (distanceToFruit[a] == distanceToFruit[b]) return false;
-        if (distanceToFruit[a] == INT_MAX) return false;
-        if (distanceToFruit[b] == INT_MAX) return true;
-        return distanceToFruit[b] - distanceToFruit[a] > 0;
+    auto compareDistance = [](const std::shared_ptr<Vertex> &a, const std::shared_ptr<Vertex> &b) {
+        if (a->distance() == b->distance()) return false;
+        if (a->distance() == INT_MAX) return false;
+        if (b->distance() == INT_MAX) return true;
+        return a->distance() - b->distance() < 0;
     };
     std::sort(fruitClearings.begin(), fruitClearings.end(), compareDistance);
 
-/*
+    /*
     std::cerr << "Fruit clearings ordered by distance: ";
-    for (auto i : fruitClearings) {
-        std::cerr << i << " ";
+    for (auto clearing : fruitClearings) {
+        std::cerr << clearing->index() << " ";
     }
     std::cerr << std::endl;
 
     for (int i = 1; i <= V; ++i) {
         std::cerr << "Distance to " << i << " is " 
-            << distanceToFruit[i] << "." << std::endl;
+            << vertexList[i-1]->distance() << "." << std::endl;
     }
-*/
+    */
 
-
-
-    if (fruitClearings.size() < days || fruitClearings[days-1] == INT_MAX) {
+    if (fruitClearings.size() < days || 
+        fruitClearings[days-1]->distance() == INT_MAX) {
         std::cout << -1 << std::endl;
     } else {
-        //std::cerr << "Kth shortest distance: " << fruitClearings[days-1] << std::endl;
-        std::cout << distanceToFruit[fruitClearings[days-1]]*2 << std::endl;
+        //std::cerr << "Kth shortest distance: " << fruitClearings[days-1]->index() << std::endl;
+        std::cout << fruitClearings[days-1]->distance() * 2 << std::endl;
     }
 
     return 0;
@@ -57,13 +60,13 @@ int main() {
  * @param E The number of Edges (lines) to read.
  * @return std::vector<Edge> The edge list.
  */
-std::vector<Edge> readEdges(int E) {
+std::vector<Edge> readEdges(int E, const std::vector<std::shared_ptr<Vertex>> &vertexList) {
     std::vector<Edge> edgeList;
     for (int i = 0; i < E; ++i) {
         int u, v, w;
         std::cin >> u >> v >> w;
-        edgeList.push_back(Edge(u, v, w));
-        edgeList.push_back(Edge(v, u, w));
+        edgeList.push_back(Edge(vertexList[u-1], vertexList[v-1], w));
+        edgeList.push_back(Edge(vertexList[v-1], vertexList[u-1], w));
     }
     return edgeList;
 }
@@ -72,14 +75,14 @@ std::vector<Edge> readEdges(int E) {
  * @brief Reads all the indices for clearings that grow fruit from standard input.
  * 
  * @param C The number of clearings that grow fruit.
- * @return std::vector<int> The list of clearings.
+ * @return std::vector<std::shared_ptr<Vertex>> The list of clearings.
  */
-std::vector<int> readFruitList(int C) {
-    std::vector<int> fruitClearings;
+std::vector<std::shared_ptr<Vertex>> readFruitList(int C, const std::vector<std::shared_ptr<Vertex>> &vertexList) {
+    std::vector<std::shared_ptr<Vertex>> fruitClearings;
     for (int i = 0; i < C; ++i) {
         int v;
         std::cin >> v;
-        fruitClearings.push_back(v);
+        fruitClearings.push_back(vertexList[v-1]);
     }
     return fruitClearings;
 }
@@ -89,41 +92,40 @@ std::vector<int> readFruitList(int C) {
  * to each other clearing. 
  * 
  * @param edgeList The list of edges in the graph.
- * @return std::map<int, int> a map from clearing indices to the distance from the
- * cottage clearing.
  */
-std::map<int, int> findShortestPaths(int V, std::vector<Edge> &edgeList) {
-    std::vector<int> visited = {1};
-    std::map<int, int> distanceTo;
-    for (int i = 1; i <= V; ++i) {
-        distanceTo[i] = INT_MAX;
-    }
-    distanceTo[1] = 0;
+void findShortestPaths(
+        int V, 
+        const std::vector<std::shared_ptr<Vertex>> &vertexList, 
+        const std::vector<Edge> &edgeList) {
 
-    auto compareDistance = [&](int a, int b) {
-        if (distanceTo[a] == distanceTo[b]) return 0;
-        if (distanceTo[a] == INT_MAX) return 1;
-        if (distanceTo[b] == INT_MAX) return -1;
-        return distanceTo[a] - distanceTo[b];
+    auto compareDistance = [](const std::shared_ptr<Vertex> &a, const std::shared_ptr<Vertex> &b) {
+        if (a->distance() == b->distance()) return false;
+        if (a->distance() == INT_MAX) return false;
+        if (b->distance() == INT_MAX) return true;
+        return a->distance() - b->distance() < 0;
     };
-    std::priority_queue<int, std::vector<int>, decltype(compareDistance)> queue(compareDistance);
-    queue.push(1);
+    std::vector<std::shared_ptr<Vertex>> queue;
+    vertexList[0]->setDistance(0);
+    queue.push_back(vertexList[0]);
 
     while (!queue.empty()) {
-        int node = queue.top();
-        queue.pop();
+        std::shared_ptr<Vertex> node = queue.front();
+        std::pop_heap(queue.begin(), queue.end(), compareDistance);
+        queue.pop_back();
         
-
         for (Edge e : edgeList) {
             if (e.fromNode() != node) continue;
 
-            int nextNode = e.toNode();
-            if (distanceTo[nextNode] > distanceTo[node] + e.weight()) {
-                distanceTo[nextNode] = distanceTo[node] + e.weight();
-                queue.push(nextNode);
+            auto nextNode = e.toNode();
+            if (nextNode->distance() > node->distance() + e.weight()) {
+                nextNode->setDistance(node->distance() + e.weight());
+                if (std::find(queue.begin(), queue.end(), nextNode) != queue.end()) {
+                    std::remove(queue.begin(), queue.end(), nextNode);
+                    std::make_heap(queue.begin(), queue.end());
+                }
+                queue.push_back(nextNode);
+                std::push_heap(queue.begin(), queue.end(), compareDistance);
             }
         }
     }
-
-    return distanceTo;
 }
